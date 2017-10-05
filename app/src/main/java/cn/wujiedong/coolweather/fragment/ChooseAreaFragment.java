@@ -1,9 +1,11 @@
 package cn.wujiedong.coolweather.fragment;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +19,10 @@ import org.litepal.crud.DataSupport;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import cn.wujiedong.coolweather.MainActivity;
 import cn.wujiedong.coolweather.R;
+import cn.wujiedong.coolweather.WeatherActivity;
 import cn.wujiedong.coolweather.db.City;
 import cn.wujiedong.coolweather.db.County;
 import cn.wujiedong.coolweather.db.Province;
@@ -94,7 +99,7 @@ public class ChooseAreaFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        //绑定listView单击时间
+        //绑定listView单击事件
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -108,6 +113,20 @@ public class ChooseAreaFragment extends Fragment {
                         queryCountys();
                         break;
                     case LEVEL_COUNTY:
+                        String weatherId = countys.get(position).getWeatherId();
+                        //根据当前class进行判断,如果是MainActivity是需要跳转,如果是WeatherActivity,不要跳转,直接属性当前活动即可
+
+                       if(getActivity() instanceof MainActivity){
+                            Intent intent = new Intent(getActivity(), WeatherActivity.class);
+                            intent.putExtra("weatherId",weatherId);
+                            startActivity(intent);
+                            getActivity().finish();
+                        }else if(getActivity() instanceof  WeatherActivity){
+                            WeatherActivity weatherActivity = (WeatherActivity)getActivity();
+                            weatherActivity.weatherDrawerLayout.closeDrawers();
+                            weatherActivity.weatherSwipeRefresh.setRefreshing(true);
+                            weatherActivity.requestWeather(weatherId);
+                        }
 
                         break;
                 }
